@@ -1,3 +1,3 @@
 # AppManageSystem
 APP信息管理系统SSM
-由于时间问题还有些功能还未实现
+基于SSM框架实现了一个简单的CURD操作
