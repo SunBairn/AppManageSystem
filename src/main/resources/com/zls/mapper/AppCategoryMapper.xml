@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zls.mapper.AppCategoryMapper">
+    <select id="queryAllCategoryLevel1" resultType="AppCategory">
+        SELECT id,category_name,parent_id
+        FROM app_category
+        WHERE parent_id is NULL
+    </select>
+    <select id="queryLevelTwoByLevelOne" resultType="com.zls.pojo.AppCategory">
+        SELECT id,category_code,category_name
+        FROM app_category
+        WHERE parent_id=#{id,jdbcType=BIGINT}
+    </select>
+    <select id="queryLevelThreeByLevelTwo" resultType="com.zls.pojo.AppCategory">
+        SELECT id,category_code,category_name
+        FROM app_category
+        WHERE parent_id=#{id,jdbcType=BIGINT}
+    </select>
+    <!--<select id="queryAllCategoryLevel2" resultType="com.zls.pojo.AppCategory">
+        SELECT id,category_name,parent_id
+        FROM app_category
+        WHERE parent_id in
+        <foreach collection="parentId" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+
+    </select>
+    <select id="queryAllCategoryLevel3" resultType="com.zls.pojo.AppCategory">
+        SELECT id,category_name,parent_id
+        FROM app_category
+        WHERE parent_id in
+        <foreach collection="parentId" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>-->
+</mapper>

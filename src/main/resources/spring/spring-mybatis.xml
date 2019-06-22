@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.springframework.org/schema/c http://www.springframework.org/schema/c/spring-c.xsd
+            http://www.springframework.org/schema/cache http://www.springframework.org/cache/cache/spring-cache.xsd
+            http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+            http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+            http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
+            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/p http://www.springframework.org/schema/p/spring-p.xsd
+            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+            http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <!--spring和springmvc是天然集成的，这里只需要解决Spring和mybatis的整合-->
+    <!--1、由Spring来管理mybatis的mapper
+        2、由Spring声明式事务（AOP）进行事务管理
+     -->
+    <!--开启注解以及扫描持久层的包，这里忽略控制层的注解，专门处理事务注解和持久层注解-->
+    <context:component-scan base-package="com.zls.mapper">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    <!--引入数据库相关信息文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!--配置数据源-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <!--如果有需要就加，c3p0私有属性-->
+        <property name="maxPoolSize" value="30"/>
+        <property name="minPoolSize" value="10"/>
+        <!--关闭连接不自动Commit-->
+        <property name="autoCommitOnClose" value="false"/>
+        <!--获取连接超时时间-->
+        <property name="checkoutTimeout" value="100000"/>
+        <!--当获取连接失败重试次数-->
+        <property name="acquireRetryAttempts" value="2"/>
+    </bean>
+    <!--最后一步，如何整合mybatis-->
+    <!--1、注入mybatis的SqlSessionFactory，这个是关键步骤  2、声明式是我管理-->
+    <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--映入mapper文件，指定核心配置文件位置-->
+       <!-- <property name="configLocation" value="mybatis-config.xml"/>-->
+        <!--这就要求所有的mapper配置文件必须在com/zls/mapper之下，,也就相当于mybatis中的<mappers/>标签-->
+        <property name="mapperLocations" value="classpath:com/zls/mapper/**/*.xml"/>
+        <property name="configuration">
+            <bean class="org.apache.ibatis.session.Configuration">
+                <!--可以加入驼峰命名，其他mybatis的配置也就是mybatis.cfg.xml的相关配置都会转移到这来-->
+                <property name="mapUnderscoreToCamelCase" value="true"/>
+                <!--这里还可以配很多，比如缓存、日志等-->
+            </bean>
+        </property>
+        <!--插件配置-->
+        <property name="plugins">
+            <array>
+                <!--分页插件的配置，拦截器实现分页-->
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <!--这里几个配置主要演示怎么使用，如果不理解，一定要去掉下面的配置-->
+                    <property name="properties" >
+                        <value>
+                            helperDialect=mysql
+                            reasonable=true
+                            supporMethodsArguments=true
+                            params=count=countSql
+                            autoRuntimeDialect=true
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>
+        <property name="typeAliasesPackage" value="com.zls.pojo"/>
+    </bean>
+    <!--持久层接口，创建数据映射器，它将会查找类路径下的映射器并自动将它们创建成MapperFactoryBean-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.zls.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"/>
+    </bean>
+
+</beans>

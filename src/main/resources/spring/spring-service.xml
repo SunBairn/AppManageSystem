@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:lang="http://www.springframework.org/schema/lang"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.springframework.org/schema/c http://www.springframework.org/schema/c/spring-c.xsd
+            http://www.springframework.org/schema/cache http://www.springframework.org/cache/cache/spring-cache.xsd
+            http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+            http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+            http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
+            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/p http://www.springframework.org/schema/p/spring-p.xsd
+            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+            http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--自动扫描配置-->
+    <context:component-scan base-package="com.zls.service"/>
+
+    <!--开启事务注解,在Service层上添加@transaction-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!--事务管理，使用数据源事务管理类进行管理,依赖于数据源-->
+     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+         <property name="dataSource" ref="dataSource"/>
+     </bean>
+
+    <!--确定事务管理的策略-->
+    <tx:advice transaction-manager="transactionManager" id="transactionAdvice">
+        <!--事务处理相关值以及他的传播性-->
+        <tx:attributes>
+            <!--
+                  所有add开始的方法都必须在事务下执行
+                  数据库隔离级别使用默认级别
+                  发生异常回滚
+              -->
+            <tx:method name="add*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+            <tx:method name="save*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+            <tx:method name="insert*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+            <tx:method name="delete*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+            <tx:method name="modify*" propagation="REQUIRED" isolation="DEFAULT" rollback-for="java.lang.Exception"/>
+
+            <!--只读方法-->
+            <tx:method name="select*" read-only="true" />
+            <tx:method name="query*" read-only="true" />
+            <tx:method name="find*" read-only="true" />
+            <tx:method name="get*" read-only="true" />
+            <tx:method name="list*" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+
+
+
+    <!--这里引用上面我们定义的策略-->
+    <!--使用AOP对事务进行织入，明确以下几个点：1、明确切入点  2、使用什么样的策略去管理-->
+    <aop:config>
+        <aop:pointcut id="txCut" expression="execution(* com.zls.service..*.*())"/>
+        <aop:advisor advice-ref="transactionAdvice" pointcut-ref="txCut"/>
+    </aop:config>
+
+</beans>

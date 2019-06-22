@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zls.mapper.AppVersionMapper">
+<!--        <resultMap id="detail1" type="AppVersion">-->
+<!--            <id property="id" column="id"/>-->
+<!--            <result property="publishStatus" column="publish_status"/>-->
+<!--            <result property="versionNo" column="version_no"/>-->
+<!--            <result property="apkFilename" column="apk_filename"/>-->
+<!--            <result property="apklocPath" column="apkloc_path"/>-->
+<!--            <result property="downloadLink" column="download_link"/>-->
+<!--            <result property="versionSize" column="version_size"/>-->
+<!--            <result property="versionInfo" column="version_info"/>-->
+<!--            <association property="appInfo" javaType="AppInfo">-->
+<!--                <result property="softwareName" column="software_name"/>-->
+<!--                <result property="apkName" column="apk_name"/>-->
+<!--                <result property="supportRom" column="support_rom"/>-->
+<!--                <result property="interfaceLanguage" column="interface_language"/>-->
+<!--                <result property="softwareSize" column="software_size"/>-->
+<!--                <result property="appInfo" column="app_info"/>-->
+<!--            </association>-->
+<!--        </resultMap>-->
+<!--    <select id="selectAppVersionById" parameterType="long" resultMap="detail1">-->
+<!--        select id,publish_status,version_no,apk_fileName,apkloc_path,download_link,-->
+<!--                version_size,version_info-->
+<!--         from app_version-->
+<!--         where id=#{id}-->
+<!--    </select>-->
+</mapper>
